@@ -1,4 +1,7 @@
 RewriteEngine On
 DirectoryIndex index.php?slug=home
+RewriteRule ^admin/index.html$ admin/index.php
+RewriteRule ^admin/category.html$ admin/category.php
+RewriteRule ^admin/category-form.html$ admin/category-form.php
 RewriteRule ^index.html$ index.php?slug=home
 RewriteRule ^([a-zA-Z0-9_-]+).html$ index.php?slug=$1
