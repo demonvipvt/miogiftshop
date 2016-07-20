@@ -205,7 +205,7 @@ $category = $conn->query($sql);
                                 <td class="center"><?php if ( $row["on_navigation"] == 1){echo '<i class="fa fa-check text-navy"></i>';}else{echo '<i class="fa fa-times text-danger"></i>';}?></td>
                                 <td class="center"><?php if ( $row["is_active"] == 1){echo '<i class="fa fa-check text-navy"></i>';}else{echo '<i class="fa fa-times text-danger"></i>';}?></td>
                                 <td class="center">
-                                    <a class="btn btn-warning btn-bitbucket">
+                                    <a class="btn btn-warning btn-bitbucket" href="category-form.html?id=<?php echo $row["id"]; ?>">
                                         <i class="fa fa-pencil"></i>
                                     </a>
                                     <a class="btn btn-danger btn-bitbucket">
