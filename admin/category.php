@@ -208,6 +208,9 @@ $category = $conn->query($sql);
                                     <a class="btn btn-warning btn-bitbucket" href="category-form.html?id=<?php echo $row["id"]; ?>">
                                         <i class="fa fa-pencil"></i>
                                     </a>
+                                    <a class="btn btn-info btn-bitbucket" href="products.html?category=<?php echo $row["id"]; ?>">
+                                        <i class="fa fa-cubes"></i>
+                                    </a>
                                     <a class="btn btn-danger btn-bitbucket">
                                         <i class="fa fa-trash-o"></i>
                                     </a>

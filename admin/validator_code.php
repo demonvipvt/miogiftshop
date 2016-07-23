@@ -2,13 +2,12 @@
 include "connect.php";
 
 $id  = empty( $_GET["id"] ) ?"":$_GET["id"];
-$obj  = empty( $_GET["obj"] ) ?"":$_GET["obj"];
-$slug  = empty( $_POST["slug"] ) ?"":$_POST["slug"];
-if($slug == ""){
+$code  = empty( $_POST["code"] ) ?"":$_POST["code"];
+if($code == ""){
 	echo json_encode(false);
 }else{
-	if( $id == "" && $obj == ""){
-		$sql = "SELECT id FROM slug WHERE slug = '".$slug."' ";
+	if( $id == "" ){
+		$sql = "SELECT code FROM product WHERE code = '".$code."' ";
 		$checking = $conn->query($sql);
 		if($checking->num_rows > 0){
 			echo json_encode(false);
@@ -16,7 +15,7 @@ if($slug == ""){
 			echo json_encode(true);
 		}
 	}else{
-		$sql = "SELECT id FROM slug WHERE `slug` = '".$slug."' AND NOT (`object` = '".$obj."' AND `object_id` = ".$id.") ";
+		$sql = "SELECT code FROM product WHERE `code` = '".$code."' AND `id` != ".$id." ";
 		$checking = $conn->query($sql);
 		if($checking->num_rows > 0){
 			echo json_encode(false);

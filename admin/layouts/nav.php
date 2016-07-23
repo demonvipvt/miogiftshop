@@ -37,7 +37,13 @@
                     <span class="nav-label">Category</span> 
                 </a>
             </li>
-
+            <li id="nav_product">
+                <a href="products.html">
+                    <i class="fa fa-cubes"></i> 
+                    <span class="nav-label">Products</span> 
+                </a>
+            </li>
+            <!-- default navigation -->
             <li>
                 <a href="#"><i class="fa fa-bar-chart-o"></i> <span class="nav-label">Graphs</span><span class="fa arrow"></span></a>
                 <ul class="nav nav-second-level">

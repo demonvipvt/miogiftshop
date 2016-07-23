@@ -3,44 +3,46 @@ include "connect.php";
 include "models/slug.php";
 
 $id  = empty( $_GET["id"] ) ?0:intval($_GET["id"]);
-$sql = "SELECT id,title  FROM category WHERE parent_id is null ";
-$category = $conn->query($sql);
+$sql = "SELECT id,title  FROM category ";
+$categoryList = $conn->query($sql);
 $errMsg = "";
 $sucMsg = "";
 $slugEntity = new slugEntity();
 
-$title = "";
-$slug = "";
-$cat_des = "";
-$on_nav = 1;
-$order = 0;
-$is_active = 1;
-$parent = 0;
-$seo_title = "";
-$seo_des = "";
-$seo_tags = "";
-$cat_image  = "";
+$title      = "";
+$code       = "";
+$slug       = "";
+$p_des      = "";
+$p_sort_des = "";
+$p_image    = "";
+$price      = 0;
+$is_active  = 1;
+$category   = 0;
+$seo_title  = "";
+$seo_des    = "";
+$seo_tags   = "";
 if( $id != 0 ){
-    $sql = "SELECT *  FROM category WHERE id = ".$id;
-    $getCat = $conn->query($sql);
-    if( $getCat->num_rows > 0 ){
-        $curCat     = $getCat->fetch_assoc() ;
-        $title      = $curCat["title"];
-        $slug       = $curCat["slug"];
-        $cat_des    = $curCat["description"];
-        $on_nav     = $curCat["on_navigation"];
-        $order      = $curCat["order"];
-        $is_active  = $curCat["is_active"];
-        $parent     = $curCat["parent_id"];
-        $seo_title  = $curCat["seo_title"];
-        $seo_des    = $curCat["seo_description"];
-        $seo_tags   = $curCat["seo_tags"];
-        $cat_image  = $curCat["image"];
-        if( $cat_image != ""){
-            $cat_old_image  = $curCat["image"];
+    $sql_get_product = "SELECT *  FROM product WHERE id = ".$id;
+    $getProduct = $conn->query($sql_get_product);
+    if( $getProduct->num_rows > 0 ){
+        $curProduct     = $getProduct->fetch_assoc() ;
+        $title      = $curProduct["title"];
+        $code       = $curProduct["code"];
+        $slug       = $curProduct["slug"];
+        $p_des      = $curProduct["description"];
+        $p_sort_des = $curProduct["sort_description"];
+        $p_image    = $curProduct["image"];
+        if($p_image != ""){
+            $p_old_image= $curProduct["image"];
         }
+        $price      = $curProduct["price"];
+        $is_active  = $curProduct["is_active"];
+        $category   = $curProduct["category_id"];
+        $seo_title  = $curProduct["seo_title"];
+        $seo_des    = $curProduct["seo_description"];
+        $seo_tags   = $curProduct["seo_tags"];
     }else{
-        $errMsg = "Invalid category ID.";
+        $errMsg = "Invalid product ID.";
     }
 }
 
@@ -48,15 +50,16 @@ if (!empty($_POST))
 {
     $title          = empty( $_POST["title"] )   ?"":$_POST["title"];
     $slug           = empty( $_POST["slug"] )   ?"":$_POST["slug"];
-    $cat_des        = empty( $_POST["description"] ) ?"": htmlspecialchars($_POST["description"]);
-    $on_nav         = empty( $_POST["on_nav"] )  ?0:1;
-    $order          = empty( $_POST["order"] )   ?0:$_POST["order"];
+    $code           = empty( $_POST["code"] )   ?"":$_POST["code"];
+    $p_des          = empty( $_POST["description"] ) ?"": htmlspecialchars($_POST["description"]);
+    $p_sort_des     = empty( $_POST["sort_description"] )   ?"":$_POST["sort_description"];
+    $price          = empty( $_POST["price"] )  ?0:$_POST["price"];
     $is_active      = empty( $_POST["active"] )  ?0:1;
-    $parent         = empty( $_POST["parent"] )  ?"null":$_POST["parent"];
+    $category       = empty( $_POST["category"] )  ?"null":$_POST["category"];
     $seo_title      = empty( $_POST["seo_title"] )          ?"":$_POST["seo_title"];
     $seo_des        = empty( $_POST["seo_description"] )    ?"":$_POST["seo_description"];
     $seo_tags       = empty( $_POST["seo_tags"] )           ?"":$_POST["seo_tags"];
-    if( $title == "" || $slug == "" || $seo_title == "" || $errMsg != ""){
+    if( $title == "" || $slug == "" || $seo_title == "" || $errMsg != "" || $p_sort_des == "" || empty($category)){
         $errMsg = "Missing required fields.";
     }
     if( $errMsg == "" ){
@@ -65,9 +68,9 @@ if (!empty($_POST))
         if( $id == 0 ){
             if( !empty($info["filename"]) ){
                 $ext = $info['extension']; // get the extension of the file
-                $cat_image = "Thumbnail-".$slug.".".$ext; 
+                $p_image = "Thumbnail-".$slug.".".$ext; 
 
-                $target = '../uploads/images/'.$cat_image;
+                $target = '../uploads/images/'.$p_image;
                 if(file_exists($target)) {
                     chmod($target,0755); //Change the file permissions if allowed
                     unlink($target); //remove the file
@@ -75,46 +78,50 @@ if (!empty($_POST))
                 move_uploaded_file( $_FILES['image']['tmp_name'], $target);
                 $newFile = true ;
             }
-            $sql = "INSERT INTO category (`title`, `description`, `image`, `slug`, `parent_id`, `is_active`, `on_navigation`, `order`, `seo_title`, `seo_description`, `seo_tags`)
+            $sql = "INSERT INTO product (`title`, `description`, `sort_description`, `code`
+                                        , `slug`, `category_id`, `is_active`
+                                        , `price`, `image`, `seo_title`
+                                        , `seo_description`, `seo_tags`)
             VALUES ('".$title."'
-                , '".$cat_des."'
-                , '".$cat_image."'
+                , '".$p_des."'
+                , '".$p_sort_des."'
+                , '".$code."'
                 , '".$slug."'
-                , ".$parent."
+                , ".$category."
                 , ".$is_active."
-                , ".$on_nav."
-                , ".$order."
+                , ".$price."
+                , '".$p_image."'
                 , '".$seo_title."'
                 , '".$seo_des."'
                 , '".$seo_tags."'
                 )";
             if ($conn->query($sql) === TRUE) {
                 $last_id = $conn->insert_id;
-                $sucMsg = "New category created successfully";
-                if ( !$slugEntity->saveSlug($conn,$slug,"category",$last_id) ) {
-                    $conn->query("DELETE FROM category WHERE `id` = ".$last_id);
+                $sucMsg = "New product created successfully";
+                if ( !$slugEntity->saveSlug($conn,$slug,"product",$last_id) ) {
+                    $conn->query("DELETE FROM product WHERE `id` = ".$last_id);
                     $errMsg = "Key slug already exist.";
                     if($newFile){
-                        unlink('../uploads/images/'.$cat_image);
+                        unlink('../uploads/images/'.$p_image);
                     }
                 }
             } else {
                 $errMsg = "Error: " . $sql . "<br>" . $conn->error;
                 if($newFile){
-                    unlink('../uploads/images/'.$cat_image);
+                    unlink('../uploads/images/'.$p_image);
                 }
             }
         }else{
-            if ( !$slugEntity->saveSlug($conn,$slug,"category",$id) ) {
+            if ( !$slugEntity->saveSlug($conn,$slug,"product",$id) ) {
                 $errMsg = "Key slug already exist.";
             }else{
                 if( !empty($info["filename"]) ){
                     $ext = $info['extension']; // get the extension of the file
-                    $cat_image = "Thumbnail-".$slug.".".$ext; 
+                    $p_image = "Thumbnail-".$slug.".".$ext; 
 
-                    $target = '../uploads/images/'.$cat_image;
-                    if(isset($cat_old_image)){
-                        $old = '../uploads/images/'.$cat_old_image;
+                    $target = '../uploads/images/'.$p_image;
+                    if(isset($p_old_image)){
+                        $old = '../uploads/images/'.$p_old_image;
                         if(file_exists($old)) {
                             chmod($old,0755); //Change the file permissions if allowed
                             unlink($old); //remove the file
@@ -127,24 +134,25 @@ if (!empty($_POST))
                     move_uploaded_file( $_FILES['image']['tmp_name'], $target);
                     $newFile = true ;
                 }
-                $sql = "UPDATE category SET `title` = '".$title."'
-                            , `description`    = '".$cat_des."'
-                            , `image`          = '".$cat_image."'
-                            , `slug`           = '".$slug."'
-                            , `parent_id`      = ".$parent."
-                            , `is_active`      = ".$is_active."
-                            , `on_navigation`  = ".$on_nav."
-                            , `order`          = ".$order."
-                            , `seo_title`      = '".$seo_title."'
-                            , `seo_description`= '".$seo_des."'
-                            , `seo_tags`       = '".$seo_tags."'
+                $sql = "UPDATE product SET `title` = '".$title."'
+                            , `slug`            = '".$slug."'
+                            , `code`            = '".$code."'
+                            , `description`     = '".$p_des."'
+                            , `sort_description`= '".$p_sort_des."'
+                            , `image`           = '".$p_image."'
+                            , `category_id`     = ".$category."
+                            , `is_active`       = ".$is_active."
+                            , `price`           = ".$price."
+                            , `seo_title`       = '".$seo_title."'
+                            , `seo_description` = '".$seo_des."'
+                            , `seo_tags`        = '".$seo_tags."'
                         WHERE id = ".$id;
                 if ($conn->query($sql) === TRUE) {
-                    $sucMsg = "Update category successfully";
+                    $sucMsg = "Update product successfully";
                 } else {
                     $errMsg = "Error: " . $sql . "<br>" . $conn->error;
                     if($newFile){
-                        unlink('../uploads/images/'.$cat_image);
+                        unlink('../uploads/images/'.$p_image);
                     }
                 }
             }
@@ -195,24 +203,17 @@ if (!empty($_POST))
                             <a href="index.html">Dashboard</a>
                         </li>
                         <li>
-                            <a href="category.html">Category</a>
+                            <a href="products.html">Products</a>
                         </li>
                         <?php 
-                        if(isset($curCat)){
-                        ?>
-                        <li>
-                            <?php echo $title ; ?>
-                        </li>
-                        <li class="active">
-                            <strong>Edit</strong>
-                        </li>
-                        <?php
+                        if(isset($curProduct)){
+                            echo '<li>'.$title."</li>";
+                            echo '<li class="active"><strong>Edit</strong></li>';
                         }else{
+                            echo '<li class="active"><strong>Add New</strong></li>';
+                        }
                         ?>
-                        <li class="active">
-                            <strong>Add New</strong>
-                        </li>
-                        <?php } ?>
+                        
                     </ol>
                 </div>
                 <div class="col-lg-2"> 
@@ -243,6 +244,13 @@ if (!empty($_POST))
                     ?>
                     <form method="post" id="category_form" class="form-horizontal" enctype='multipart/form-data'>
 
+                        <div class="form-group"><label class="col-sm-2 control-label">Code</label>
+
+                            <div class="col-sm-10"><input type="text" class="form-control" name="code" id="code" value="<?php echo $code; ?>"></div>
+                        </div>
+
+                        <div class="hr-line-dashed"></div>
+
                         <div class="form-group"><label class="col-sm-2 control-label">Title</label>
 
                             <div class="col-sm-10"><input type="text" class="form-control" name="title" id="title" value="<?php echo $title; ?>"></div>
@@ -259,7 +267,7 @@ if (!empty($_POST))
 
                             <div class="col-sm-10">
                                 <?php 
-                                    $previewImage = $cat_image == ""?"":"/uploads/images/".$cat_image;
+                                    $previewImage = $p_image == ""?"":"/uploads/images/".$p_image;
                                 ?>
                                 <a class="fancybox" id="preview_container" href="<?php echo $previewImage;?>" title="Picture 1">
                                     <img alt="image" id="preview" src="<?php echo $previewImage;?>">
@@ -270,13 +278,12 @@ if (!empty($_POST))
                         </div>
 
                         <div class="hr-line-dashed"></div>
-                        <div class="form-group"><label class="col-sm-2 control-label">Parent</label>
+                        <div class="form-group"><label class="col-sm-2 control-label">Category</label>
                             <div class="col-sm-10">
-                                <select class="form-control m-b" name="parent">
-                                    <option value="">Select parent category</option>
+                                <select class="form-control m-b" name="category">
                                     <?php 
-                                        while($row = $category->fetch_assoc()) {
-                                            $selectedOption = $row['id'] == $parent ?"selected":"";
+                                        while($row = $categoryList->fetch_assoc()) {
+                                            $selectedOption = $row['id'] == $category ?"selected":"";
                                     ?>
                                     <option value="<?php echo $row['id'] ?>" <?php echo $selectedOption ?>><?php echo $row['title']?></option>
                                     <?php } ?>
@@ -285,23 +292,26 @@ if (!empty($_POST))
                         </div>
 
                         <div class="hr-line-dashed"></div>
-                        <div class="form-group"><label class="col-sm-2 control-label">On navigation</label>
+                        <div class="form-group"><label class="col-sm-2 control-label">Price</label>
 
-                            <div class="col-sm-10">
-                                <div class="checkbox"><label> <input type="checkbox" value="1" name="on_nav" <?php if($on_nav == 1){echo "checked";}; ?> > The category will be show on navigation if you checked this one .</label></div>
-                            </div>
+                            <div class="col-sm-10"><input type="text" class="form-control" name="price" id="price" value="<?php echo $price; ?>"></div>
                         </div>
 
                         <div class="hr-line-dashed"></div>
-                        <div class="form-group"><label class="col-sm-2 control-label">Order</label>
-                            <div class="col-sm-2"><input type="number" class="form-control" name="order" value="<?php echo $order; ?>"> 
-                            </div><span class="help-block m-b-none">for sorting category on navigation.</span>
+                        <div class="form-group"><label class="col-sm-2 control-label">Sort description</label>
+                            <div class="col-sm-10">
+                                <div class="">
+                                    <textarea class="" name="sort_description" id="sort_description" style="width:100%;"> <?php echo $p_sort_des; ?></textarea>
+                                    <span class="help-block m-b-none">will show when hover in thumbnail.</span>
+                                    
+                                </div>
+                            </div>
                         </div>
                         <div class="hr-line-dashed"></div>
                         <div class="form-group"><label class="col-sm-2 control-label">Description</label>
 
                             <div class="col-sm-10">
-                                <textarea class="ckeditor" name="description" id="description"> <?php echo $cat_des; ?></textarea>
+                                <textarea class="ckeditor" name="description" id="description"> <?php echo $p_des; ?></textarea>
                             </div>
                         </div>
 
@@ -309,7 +319,7 @@ if (!empty($_POST))
                         <div class="form-group"><label class="col-sm-2 control-label">Active</label>
 
                             <div class="col-sm-10">
-                                <div class="checkbox"><label> <input type="checkbox" value="1" name="active"  <?php if($is_active == 1){echo "checked";}; ?>> Turn on or off the category.</label></div>
+                                <div class="checkbox"><label> <input type="checkbox" value="1" name="active"  <?php if($is_active == 1){echo "checked";}; ?>> Turn on or off the product.</label></div>
                             </div>
                         </div>
 
@@ -360,7 +370,7 @@ if (!empty($_POST))
     <script src="js/plugins/iCheck/icheck.min.js"></script>
     <!-- CKeditor -->
     <script src="../ckeditor/ckeditor.js"></script>
-    <script src="../ckfinder/ckfinder.js"></script>
+    <script src="../cffinder/ckfinder.js"></script>
     <!-- validate form -->
     <script src="jquery-validation-1.15.0/jquery.validate.min.js"></script>
     <!-- fancy box -->
@@ -409,12 +419,20 @@ if (!empty($_POST))
 
 
                 CKEDITOR.replace("description");
-                <?php $urlID = empty($id)?"":"?obj=category&id=".$id ?>
+                <?php $urlID = empty($id)?"":"?obj=product&id=".$id ?>
                 var urlID = <?php echo json_encode($urlID); ?>;
                 $("#category_form").validate({
                     rules: {
                         title: {
                             required: true
+                        },
+                        code: {
+                            required: true,
+                            remote: {
+                                url: '/admin/validator_code.php'+urlID,
+                                type: 'POST',
+                                async: false
+                            }
                         },
                         slug: {
                             required: true,
@@ -424,8 +442,14 @@ if (!empty($_POST))
                                 async: false
                             }
                         },
+                        sort_description: {
+                            required: true
+                        },
                         description: {
                             required: true
+                        },
+                        price: {
+                            number: true
                         },
                         seo_title: {
                             required: true
@@ -434,6 +458,9 @@ if (!empty($_POST))
                     messages: {
                         slug: {
                             remote: 'Slug đã được sử dụng .'
+                        },
+                        code: {
+                            remote: 'Code đã được sử dụng .'
                         }
                     }
                 });
