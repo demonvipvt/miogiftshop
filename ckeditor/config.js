@@ -36,10 +36,13 @@ CKEDITOR.editorConfig = function( config ) {
 	// Simplify the dialog windows.
 	config.removeDialogTabs = 'image:advanced;link:advanced';
 	// ckfinder
-	config.filebrowserBrowseUrl = 'http://miogiftshop.local/ckfinder/ckfinder.html';
-	config.filebrowserImageBrowseUrl = 'http://miogiftshop.local/ckfinder/ckfinder.html?type=Images';
-	config.filebrowserFlashBrowseUrl = 'http://miogiftshop.local/ckfinder/ckfinder.html?type=Flash';
-	config.filebrowserUploadUrl = 'http://miogiftshop.local/ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Files';
-	config.filebrowserImageUploadUrl = 'http://miogiftshop.local/ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Images';
-	config.filebrowserFlashUploadUrl = 'http://miogiftshop.local/ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Flash';
+	var http = location.protocol;
+	var slashes = http.concat("//");
+	var host = slashes.concat(window.location.hostname);
+	config.filebrowserBrowseUrl = host+'/ckfinder/ckfinder.html';
+	config.filebrowserImageBrowseUrl = host+'/ckfinder/ckfinder.html?type=Images';
+	config.filebrowserFlashBrowseUrl = host+'/ckfinder/ckfinder.html?type=Flash';
+	config.filebrowserUploadUrl = host+'/ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Files';
+	config.filebrowserImageUploadUrl = host+'/ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Images';
+	config.filebrowserFlashUploadUrl = host+'/ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Flash';
 };
