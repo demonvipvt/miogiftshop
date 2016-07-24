@@ -3,6 +3,7 @@ RewriteRule ^admin/index.html$ admin/index.php
 RewriteRule ^admin/category.html$ admin/category.php
 RewriteRule ^admin/category-form.html$ admin/category-form.php
 RewriteRule ^admin/products.html$ admin/products.php
+RewriteRule ^admin/product-detail.html$ admin/product-detail.php
 RewriteRule ^admin/product-form.html$ admin/product-form.php
 RewriteRule ^index.html$ index.php?slug=home
 DirectoryIndex index.php?slug=home

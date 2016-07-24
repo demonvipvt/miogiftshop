@@ -1,4 +1,5 @@
 <?php 
+session_start();
 include "connect.php";
 include "models/slug.php";
 
@@ -45,7 +46,7 @@ if( $id != 0 ){
         $errMsg = "Invalid product ID.";
     }
 }
-
+$backlink = "";
 if (!empty($_POST))
 {
     $title          = empty( $_POST["title"] )   ?"":$_POST["title"];
@@ -59,6 +60,7 @@ if (!empty($_POST))
     $seo_title      = empty( $_POST["seo_title"] )          ?"":$_POST["seo_title"];
     $seo_des        = empty( $_POST["seo_description"] )    ?"":$_POST["seo_description"];
     $seo_tags       = empty( $_POST["seo_tags"] )           ?"":$_POST["seo_tags"];
+    $backlink       = empty( $_POST["backlink"] )?"products.html":$_POST["backlink"];
     if( $title == "" || $slug == "" || $seo_title == "" || $errMsg != "" || $p_sort_des == "" || empty($category)){
         $errMsg = "Missing required fields.";
     }
@@ -104,6 +106,10 @@ if (!empty($_POST))
                     if($newFile){
                         unlink('../uploads/images/'.$p_image);
                     }
+                }else{
+                    $_SESSION["sucMsg"] = $sucMsg;
+                    header('Location: '.$backlink);
+                    session_write_close();
                 }
             } else {
                 $errMsg = "Error: " . $sql . "<br>" . $conn->error;
@@ -149,6 +155,9 @@ if (!empty($_POST))
                         WHERE id = ".$id;
                 if ($conn->query($sql) === TRUE) {
                     $sucMsg = "Update product successfully";
+                    $_SESSION["sucMsg"] = $sucMsg;
+                    header('Location: '.$backlink);
+                    session_write_close();
                 } else {
                     $errMsg = "Error: " . $sql . "<br>" . $conn->error;
                     if($newFile){
@@ -344,7 +353,7 @@ if (!empty($_POST))
                         <div class="hr-line-dashed"></div>
                         <div class="form-group">
                             <div class="col-sm-4 col-sm-offset-2">
-                                <input type="hidden" id="backlink">
+                                <input type="hidden" id="backlink" name="backlink" value="<?php echo $backlink;?>">
                                 <button class="btn btn-white" id="btn_cancel" type="button">Cancel</button>
                                 <button class="btn btn-primary" type="submit">Save changes</button>
                             </div>

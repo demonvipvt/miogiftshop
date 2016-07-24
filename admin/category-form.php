@@ -1,4 +1,5 @@
 <?php 
+session_start();
 include "connect.php";
 include "models/slug.php";
 
@@ -97,6 +98,9 @@ if (!empty($_POST))
                     if($newFile){
                         unlink('../uploads/images/'.$cat_image);
                     }
+                    $_SESSION["sucMsg"] = $sucMsg;
+                    header('Location: category.html');
+                    session_write_close();
                 }
             } else {
                 $errMsg = "Error: " . $sql . "<br>" . $conn->error;
@@ -141,6 +145,9 @@ if (!empty($_POST))
                         WHERE id = ".$id;
                 if ($conn->query($sql) === TRUE) {
                     $sucMsg = "Update category successfully";
+                    header('Location: category.html');
+                    $_SESSION["sucMsg"] = $sucMsg;
+                    session_write_close();
                 } else {
                     $errMsg = "Error: " . $sql . "<br>" . $conn->error;
                     if($newFile){

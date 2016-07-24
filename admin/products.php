@@ -1,17 +1,33 @@
 <?php 
 include "connect.php";
 
-$sql = "SELECT *  FROM product ";
+$sql = "SELECT *,(select count(id) from price where from_date <= '".date("Y-m-d")."' AND to_date >= '".date("Y-m-d")."' AND product_id = product.id ) as sale  FROM product ";
 if(isset($_GET["category"])){
     $sqlcat = "SELECT id,title  FROM category WHERE id = ".$_GET["category"];
     $getCat = $conn->query($sqlcat);
     if( $getCat->num_rows > 0 ){
         $curCat     = $getCat->fetch_assoc() ;
-        $sql = "SELECT *  FROM product WHERE category_id = ".$curCat["id"];
+        $sql = "SELECT *,(select count(id) from price where from_date <= '".date("Y-m-d")."' AND to_date >= '".date("Y-m-d")."' AND product_id = product.id ) as sale  FROM product WHERE category_id = ".$curCat["id"];
     }
 
 }
 $products = $conn->query($sql);
+
+$sucMsg = "";
+if( isset($_SESSION['sucMsg']) ){
+    $sucMsg = $_SESSION['sucMsg'];
+    unset($_SESSION['sucMsg']);
+}
+$errMsg = "";
+if( isset($_SESSION['errMsg']) ){
+    $errMsg = $_SESSION['errMsg'];
+    unset($_SESSION['errMsg']);
+}
+
+// get all category for filter product
+$sql_getcat = "SELECT id,title,IF(isNull(parent_id),0,parent_id) as parent FROM category WHERE is_active = 1 ORDER BY parent_id,title";
+
+$categories = $conn->query($sql_getcat);
 ?>
 
 
@@ -33,12 +49,6 @@ $products = $conn->query($sql);
 
     <link href="css/animate.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
-    <style type="text/css">
-    .addnew{
-        margin-top: 20px;
-        margin-bottom: 10px;
-    }
-    </style>
 </head>
 
 <body>
@@ -67,8 +77,19 @@ $products = $conn->query($sql);
                         <?php
                             if(isset($curCat)){
                         ?>
-                        <li>
-                            <a href="category.html?id=<?php echo $curCat['id'];?>" ><?php echo $curCat["title"]; ?></a>
+                        <li class="btn-group">
+                            <a data-toggle="dropdown" class="dropdown-toggle" href="category.html?id=<?php echo $curCat['id'];?>" ><?php echo $curCat["title"]; ?> <span class="caret"></span></a>
+
+                            <ul class="dropdown-menu">
+                            <?php 
+                                $curCatID = isset($curCat)?$curCat["id"]:0;
+                                while($rowCat = $categories->fetch_assoc()) {
+                                    $activated = $rowCat["id"] == $curCatID ?"active":"";
+                                     echo '<li class="'.$activated.'"><a href="products.html?category='.$rowCat["id"].'">'.$rowCat["title"].'</a></li>';
+
+                                }
+                            ?>
+                            </ul>
                         </li>
                         <?php } ?>
                         <li class="active">
@@ -101,6 +122,26 @@ $products = $conn->query($sql);
             </div>
             <div class="row">
                 <div class="col-lg-12">
+                    <?php
+                    if($errMsg != ""){
+                    ?>
+                    <div class="alert alert-danger alert-dismissable">
+                        <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                        <?php echo $errMsg ?>
+                    </div>
+                    <?php
+                    }
+                    ?>
+                    <?php
+                    if($sucMsg != ""){
+                    ?>
+                    <div class="alert alert-success alert-dismissable">
+                        <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                        <?php echo $sucMsg ?>
+                    </div>
+                    <?php
+                    }
+                    ?>
                     <table class="table table-striped table-bordered table-hover dataTables-example" >
                         <thead>
                             <tr>
@@ -122,10 +163,15 @@ $products = $conn->query($sql);
                                 <td><?php echo $row["slug"]?></td>
                                 <td><?php echo $row["title"]?></td>
                                 <td class="center"><?php echo $row["quantity_sold"]?></td>
-                                <td class="center"><?php if($row["price"] == 0){ echo "Call";}else{echo $row["price"];}?></td>
+                                <td class="center"><?php if($row["price"] == 0){ echo "Call";}else{echo number_format($row["price"],2,","," ");}?> VND</td>
                                 <td class="center">
                                     <?php if ( $row["is_active"] == 1){
-                                        echo '<span class="label label-primary"><i class="fa fa-check"></i> Active</span>';
+                                        if( $row['sale'] > 0){
+                                            echo '<span class="label label-warning"><i class="fa fa-level-down"></i> Sale</span>';
+                                        }else{
+                                            echo '<span class="label label-primary"><i class="fa fa-check"></i> Active</span>';
+                                        }
+                                        
                                     }else{
                                         echo '<span class="label label-danger"><i class="fa fa-times"></i> De-active</span>';
                                     }?>
@@ -133,6 +179,9 @@ $products = $conn->query($sql);
                                 <td class="center">
                                     <a class="btn btn-warning btn-bitbucket" href="product-form.html?id=<?php echo $row["id"]; ?>">
                                         <i class="fa fa-pencil"></i>
+                                    </a>
+                                    <a class="btn btn-primary btn-bitbucket" href="product-detail.html?product=<?php echo $row["id"]; ?>">
+                                        <i class="fa fa-rocket"></i>
                                     </a>
                                     <a class="btn btn-danger btn-bitbucket">
                                         <i class="fa fa-trash-o"></i>
