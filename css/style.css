@@ -33,6 +33,9 @@ body a{
 .header_top-sec{
   padding: 15px 0 8px;
 }
+.logo {
+	width: 150px;
+}
 .logo img{
 	width:100%;
 }

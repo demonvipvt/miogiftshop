@@ -4,8 +4,6 @@ include "connect.php";
 include "models/slug.php";
 
 $id  = empty( $_GET["id"] ) ?0:intval($_GET["id"]);
-$sql = "SELECT id,title  FROM category WHERE parent_id is null ";
-$category = $conn->query($sql);
 $errMsg = "";
 $sucMsg = "";
 $slugEntity = new slugEntity();
@@ -21,6 +19,8 @@ $seo_title = "";
 $seo_des = "";
 $seo_tags = "";
 $cat_image  = "";
+
+$empty_child = true ;
 if( $id != 0 ){
     $sql = "SELECT *  FROM category WHERE id = ".$id;
     $getCat = $conn->query($sql);
@@ -40,9 +40,19 @@ if( $id != 0 ){
         if( $cat_image != ""){
             $cat_old_image  = $curCat["image"];
         }
+        $sql_get_child = "SELECT id  FROM category WHERE parent_id = ".$curCat['id'];
+        $getChild = $conn->query($sql_get_child);
+        if($getChild->num_rows > 0){
+            $empty_child = false;
+        }
+
     }else{
         $errMsg = "Invalid category ID.";
     }
+}
+if($empty_child){
+    $sql = "SELECT id,title  FROM category WHERE parent_id is null ";
+    $category = $conn->query($sql);
 }
 
 if (!empty($_POST))
@@ -282,11 +292,12 @@ if (!empty($_POST))
                                 <select class="form-control m-b" name="parent">
                                     <option value="">Select parent category</option>
                                     <?php 
+                                        if($empty_child){
                                         while($row = $category->fetch_assoc()) {
                                             $selectedOption = $row['id'] == $parent ?"selected":"";
                                     ?>
                                     <option value="<?php echo $row['id'] ?>" <?php echo $selectedOption ?>><?php echo $row['title']?></option>
-                                    <?php } ?>
+                                    <?php } }?>
                                 </select>
                             </div>
                         </div>

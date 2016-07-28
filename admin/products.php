@@ -68,7 +68,13 @@ $categories = $conn->query($sql_getcat);
                 <div class="col-lg-10">
                     <h2>
                         Products
-                        <a href="product-form.html" class="btn btn-w-m btn-primary pull-right">Add New</a>
+                        <?php 
+                            $catString = '';
+                            if(isset($curCat)){
+                                $catString = "?category=".$curCat['id'];
+                            }
+                        ?>
+                        <a href="product-form.html<?php echo $catString; ?>" class="btn btn-w-m btn-primary pull-right">Add New</a>
                     </h2>
                     <ol class="breadcrumb">
                         <li>
@@ -156,6 +162,10 @@ $categories = $conn->query($sql_getcat);
                         </thead>
                         <tbody>
                             <?php  
+                                $catString = '';
+                                if(isset($curCat)){
+                                    $catString = "&category=".$curCat['id'];
+                                }
                                 while($row = $products->fetch_assoc()) {
                             ?>
                             <tr class="gradeX">
@@ -177,10 +187,10 @@ $categories = $conn->query($sql_getcat);
                                     }?>
                                 </td>
                                 <td class="center">
-                                    <a class="btn btn-warning btn-bitbucket" href="product-form.html?id=<?php echo $row["id"]; ?>">
+                                    <a class="btn btn-warning btn-bitbucket" href="product-form.html?id=<?php echo $row["id"]; echo $catString; ?>">
                                         <i class="fa fa-pencil"></i>
                                     </a>
-                                    <a class="btn btn-primary btn-bitbucket" href="product-detail.html?product=<?php echo $row["id"]; ?>">
+                                    <a class="btn btn-primary btn-bitbucket" href="product-detail.html?product=<?php echo $row["id"]; echo $catString; ?>">
                                         <i class="fa fa-rocket"></i>
                                     </a>
                                     <a class="btn btn-danger btn-bitbucket">
