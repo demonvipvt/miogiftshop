@@ -101,6 +101,7 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
      <div class="container">
          <div class="menu_sec">
          <!-- start header menu -->
+         <?php $activeMenu = "home"; ?>
          <?php include "layouts/header-menu.php"; ?>
              <div class="clearfix"></div>
          </div>

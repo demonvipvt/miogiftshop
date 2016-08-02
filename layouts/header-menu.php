@@ -2,10 +2,15 @@
     include "config/connect.php";
     $sql = "SELECT *  FROM category WHERE is_active = 1 AND on_navigation = 1 AND parent_id is null ORDER BY `order` ";
     $category = $conn->query($sql);
+    if(!isset($slugKey)){
+        $slugKey = "home";
+    }
+    $menuStyle = 2;
 ?>
 <ul class="megamenu skyblue">
-    <li class="grid"><a class="color1" href="index.html">Home</a></li>
-    <li class="active grid"><a class="color2" href="#">Category</a>
+    <?php if($menuStyle == 1){ ?>
+    <li class="grid <?php if($slugKey == 'home'){echo 'active';} ?>"><a class="color1" href="index.html">Home</a></li>
+    <li class="grid <?php if($activeMenu == 'category'){echo 'active';} ?>"><a class="color2" href="#">Category</a>
         <div class="megapanel">
             <div class="row">
         <?php 
@@ -43,58 +48,7 @@
         <?php 
             }
         ?>
-                <!-- <div class="col1">
-                    <div class="h_nav">
-                        <h4>Tables</h4>
-                        <ul>
-                            <li><a href="products.html">Coffee Tables</a></li>
-                            <li><a href="products.html">Dinning Tables</a></li>
-                            <li><a href="products.html">Study Tables</a></li>
-                            <li><a href="products.html">Wooden Tables</a></li>
-                            <li><a href="products.html">Study Tables</a></li>
-                            <li><a href="products.html">Bar & Unit Stools</a></li>
-                        </ul>   
-                    </div>                          
-                </div>
-                <div class="col1">
-                    <div class="h_nav">
-                        <h4>Beds</h4>
-                        <ul>
-                            <li><a href="products.html">Single Bed</a></li>
-                            <li><a href="products.html">Poster Bed</a></li>
-                            <li><a href="products.html">Sofa Cum Bed</a></li>
-                            <li><a href="products.html">Bunk Bed</a></li>
-                            <li><a href="products.html">King Size Bed</a></li>
-                            <li><a href="products.html">Metal Bed</a></li>
-                        </ul>   
-                    </div>                                              
-                </div>
-                <div class="col1">
-                    <div class="h_nav">
-                        <h4>Seating</h4>
-                        <ul>
-                            <li><a href="products.html">Wing Chair</a></li>
-                            <li><a href="products.html">Accent Chair</a></li>
-                            <li><a href="products.html">Arm Chair</a></li>
-                            <li><a href="products.html">Mettal Chair</a></li>
-                            <li><a href="products.html">Folding Chair</a></li>
-                            <li><a href="products.html">Bean Bags</a></li>
-                        </ul>   
-                    </div>                      
-                </div>
-                <div class="col1">
-                    <div class="h_nav">
-                        <h4>Solid Woods</h4>
-                        <ul>
-                            <li><a href="products.html">Side Tables</a></li>
-                            <li><a href="products.html">T.v Units</a></li>
-                            <li><a href="products.html">Dressing Tables</a></li>
-                            <li><a href="products.html">Wardrobes</a></li>
-                            <li><a href="products.html">Shoe Racks</a></li>
-                            <li><a href="products.html">Console Tables</a></li>
-                        </ul>   
-                    </div>
-                </div> -->
+
             </div>
             <div class="row">
                 <div class="col2"></div>
@@ -110,7 +64,18 @@
     <li><a class="color5" href="#">Page 3</a></li>
     <li><a class="color6" href="#">Page 4</a></li>               
     <li><a class="color7" href="#">About</a></li>               
-    <li><a class="color8" href="#">Maps</a></li>               
+    <li><a class="color8" href="#">Maps</a></li>    
+    <?php }else{
+        $countCat = 2 ;
+        while($row = $category->fetch_assoc()) {
+            $active = strtolower($slugKey) == strtolower($row['slug'])?"active":"";
+            echo '<li class="'.$active.' grid "><a class="color'.($countCat++).'" href="'.$row['slug'].'.html">'.$row['title'].'</a></li>';
+            if($countCat == 10){
+                $countCat = 1;
+            }
+        }
+        }
+    ?>
 </ul> 
 <div class="search">
     <form>
